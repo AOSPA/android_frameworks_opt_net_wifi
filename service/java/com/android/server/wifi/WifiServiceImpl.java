@@ -37,6 +37,7 @@ import static com.android.server.wifi.WifiController.CMD_EMERGENCY_CALL_STATE_CH
 import static com.android.server.wifi.WifiController.CMD_EMERGENCY_MODE_CHANGED;
 import static com.android.server.wifi.WifiController.CMD_SCAN_ALWAYS_MODE_CHANGED;
 import static com.android.server.wifi.WifiController.CMD_SET_AP;
+import static com.android.server.wifi.WifiController.CMD_SET_DUAL_AP;
 import static com.android.server.wifi.WifiController.CMD_WIFI_TOGGLED;
 
 import android.Manifest;
@@ -98,6 +99,7 @@ import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -230,6 +232,9 @@ public class WifiServiceImpl extends BaseWifiService {
     private int mWifiApState = WifiManager.WIFI_AP_STATE_DISABLED;
     private int mSoftApState = WifiManager.WIFI_AP_STATE_DISABLED;
     private int mSoftApNumClients = 0;
+
+    // Store Previous AP band when current band is dual band
+    private int mPrevApBand = 0;
 
     /**
      * Power profile
@@ -966,6 +971,10 @@ public class WifiServiceImpl extends BaseWifiService {
             Binder.restoreCallingIdentity(ident);
         }
         mWifiMetrics.incrementNumWifiToggles(isPrivileged, enable);
+
+        if (enable && mWifiApConfigStore.getDualSapStatus())
+            stopSoftAp();
+
         mWifiController.sendMessage(CMD_WIFI_TOGGLED);
         return true;
     }
@@ -1143,6 +1152,9 @@ public class WifiServiceImpl extends BaseWifiService {
             return true;
         }
 
+        // This will internally check for DUAL_BAND and take action.
+        startDualSapMode(wifiConfig, true);
+
         // null wifiConfig is a meaningful input for CMD_SET_AP
         if (wifiConfig == null || WifiApConfigStore.validateApWifiConfiguration(wifiConfig)) {
             SoftApModeConfiguration softApConfig = new SoftApModeConfiguration(mode, wifiConfig);
@@ -1194,6 +1206,10 @@ public class WifiServiceImpl extends BaseWifiService {
 
         mSoftApExtendingWifi = false;
         mWifiController.sendMessage(CMD_SET_AP, 0, mode);
+
+        if (mWifiApConfigStore.getDualSapStatus())
+            startDualSapMode(null, false);
+
         return true;
     }
 
@@ -3736,5 +3752,42 @@ public class WifiServiceImpl extends BaseWifiService {
                 .c(Binder.getCallingUid())
                 .c(enable).flush();
         mFacade.setIntegerSetting(mContext, Settings.Global.WIFI_UNSAVED_NETWORK_LINKING_FEATURE_ENABLED, (enable ? 1 : 0));
+    }
+
+    private boolean startDualSapMode(WifiConfiguration apConfig, boolean enable) {
+        if (apConfig == null)
+            apConfig = mWifiApConfigStore.getApConfiguration();
+
+        // If dual sap property is set, enable/disable softap for dual sap.
+        if (enable && SystemProperties.get("persist.vendor.wifi.softap.dualband", "0").equals("1")) {
+            mPrevApBand = apConfig.apBand;
+            apConfig.apBand = WifiConfiguration.AP_BAND_DUAL;
+        } else if(apConfig.apBand == WifiConfiguration.AP_BAND_DUAL) {
+            apConfig.apBand = mPrevApBand;
+        }
+
+        // Check if this request is for DUAL sap mode.
+        if (enable && (apConfig.apBand != WifiConfiguration.AP_BAND_DUAL)) {
+            Slog.e(TAG, "Continue with Single SAP Mode.");
+            return false;
+        }
+
+        mLog.trace("startDualSapMode uid=% enable=%").c(Binder.getCallingUid()).c(enable).flush();
+
+        if (enable && mWifiApConfigStore.getDualSapStatus()) {
+            Slog.d(TAG, "DUAL Sap Mode already enabled. Do nothing!!");
+            return true;
+        }
+
+        boolean apEnabled = mWifiApState != WifiManager.WIFI_AP_STATE_DISABLED;
+
+        // Reset StateMachine(s) to Appropriate State(s)
+        if (enable && apEnabled)
+            mWifiController.sendMessage(CMD_SET_AP, 0, 0);
+
+        if (enable)
+            mWifiController.sendMessage(CMD_SET_DUAL_AP);
+
+        return true;
     }
 }
