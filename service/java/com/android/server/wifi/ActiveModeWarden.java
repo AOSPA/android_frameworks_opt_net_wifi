@@ -585,6 +585,24 @@ public class ActiveModeWarden {
                 mSoftApCallback.onNumClientsChanged(numClients);
             }
         }
+
+        @Override
+        public void onStaConnected(String Macaddr, int numClients) {
+            if (mSoftApCallback != null) {
+                mSoftApCallback.onStaConnected(Macaddr, numClients);
+            } else {
+                Log.d(TAG, "SoftApCallback is null. Dropping onStaConnected event.");
+            }
+        }
+
+        @Override
+        public void onStaDisconnected(String Macaddr, int numClients) {
+            if (mSoftApCallback != null) {
+                mSoftApCallback.onStaDisconnected(Macaddr, numClients);
+            } else {
+                Log.d(TAG, "SoftApCallback is null. Dropping onStaDisconnected event.");
+            }
+        }
     }
 
     private void startSoftAp(SoftApModeConfiguration softapConfig) {
