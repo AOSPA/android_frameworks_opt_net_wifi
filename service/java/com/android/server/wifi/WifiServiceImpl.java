@@ -232,6 +232,7 @@ public class WifiServiceImpl extends BaseWifiService {
     private int mWifiApState = WifiManager.WIFI_AP_STATE_DISABLED;
     private int mSoftApState = WifiManager.WIFI_AP_STATE_DISABLED;
     private int mSoftApNumClients = 0;
+    private int mQCSoftApNumClients = 0;
 
     // Store Previous AP band when current band is dual band
     private int mPrevApBand = 0;
@@ -1266,6 +1267,54 @@ public class WifiServiceImpl extends BaseWifiService {
                 }
             }
         }
+
+        /**
+         * Called when station connected to soft AP changes.
+         *
+         * @param Macaddr Mac Address of connected Stations to soft AP
+         * @param numClients number of connected clients to soft AP
+         */
+        @Override
+        public void onStaConnected(String Macaddr,int numClients) {
+            mQCSoftApNumClients = numClients;
+
+            Iterator<ISoftApCallback> iterator = mRegisteredSoftApCallbacks.getCallbacks().iterator();
+            while (iterator.hasNext()) {
+                ISoftApCallback callback = iterator.next();
+                try {
+                    Log.d(TAG, "onStaConnected Macaddr: " + Macaddr +
+                          " with num of active client:" + mQCSoftApNumClients);
+                    callback.onStaConnected(Macaddr, mQCSoftApNumClients);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "onStaConnected: remote exception -- " + e);
+                    iterator.remove();
+                }
+            }
+        }
+
+        /**
+         * Called when station disconnected to soft AP changes.
+         *
+         * @param Macaddr Mac Address of Disconnected Stations to soft AP
+         * @param numClients number of connected clients to soft AP
+         */
+        @Override
+        public void onStaDisconnected(String Macaddr, int numClients) {
+            mQCSoftApNumClients = numClients;
+
+            Iterator<ISoftApCallback> iterator = mRegisteredSoftApCallbacks.getCallbacks().iterator();
+            while (iterator.hasNext()) {
+                ISoftApCallback callback = iterator.next();
+                try {
+                    Log.d(TAG, "onStaDisconnected Macaddr: " + Macaddr +
+                          " with num of active client:" + mQCSoftApNumClients);
+                    callback.onStaDisconnected(Macaddr, mQCSoftApNumClients);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "onStaDisconnected: remote exception -- " + e);
+                    iterator.remove();
+                }
+            }
+        }
     }
 
     /**
@@ -1306,6 +1355,7 @@ public class WifiServiceImpl extends BaseWifiService {
             try {
                 callback.onStateChanged(mSoftApState, 0);
                 callback.onNumClientsChanged(mSoftApNumClients);
+                callback.onStaConnected("", mQCSoftApNumClients);
             } catch (RemoteException e) {
                 Log.e(TAG, "registerSoftApCallback: remote exception -- " + e);
             }
