@@ -109,6 +109,7 @@ public class WifiNative {
         mWificondControl.enableVerboseLogging(mVerboseLoggingEnabled);
         mSupplicantStaIfaceHal.enableVerboseLogging(mVerboseLoggingEnabled);
         mWifiVendorHal.enableVerboseLogging(mVerboseLoggingEnabled);
+        mHostapdHal.enableVerboseLogging(mVerboseLoggingEnabled);
     }
 
     /********************************************************
