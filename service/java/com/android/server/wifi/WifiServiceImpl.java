@@ -3728,4 +3728,18 @@ public class WifiServiceImpl extends BaseWifiService {
                 .c(enable).flush();
         mFacade.setIntegerSetting(mContext, Settings.Global.WIFI_COVERAGE_EXTEND_FEATURE_ENABLED, (enable ? 1 : 0));
     }
+
+    /**
+     * Gets SoftAP Wi-Fi Generation
+     * @return Wi-Fi generation if SoftAp enabled or -1.
+     */
+    @Override
+    public int getSoftApWifiGeneration() {
+        enforceAccessPermission();
+        if (mSoftApState == WifiManager.WIFI_AP_STATE_ENABLED) {
+            return mWifiApConfigStore.getWifiGeneration();
+        } else {
+            return -1;
+        }
+    }
 }

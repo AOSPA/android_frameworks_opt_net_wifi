@@ -434,6 +434,9 @@ public class InformationElementUtil {
         public boolean isESS;
         public boolean isPrivacy;
         public boolean isWPS;
+        public boolean reportHt;
+        public boolean reportVht;
+        public boolean reportHe;
 
         public Capabilities() {
         }
