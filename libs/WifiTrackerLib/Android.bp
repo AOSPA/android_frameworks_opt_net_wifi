@@ -17,7 +17,7 @@ java_defaults {
         "framework-wifi-vendor-hide-access-defaults",
     ],
 
-    min_sdk_version: "S",
+    min_sdk_version: "29",
 }
 
 android_library {
