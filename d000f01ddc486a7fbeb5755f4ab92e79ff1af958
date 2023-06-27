@@ -16,6 +16,24 @@
       "message": "what ota app",
       "revId": "d000f01ddc486a7fbeb5755f4ab92e79ff1af958",
       "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "70c84f8c_52a253e2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000911
+      },
+      "writtenOn": "2023-06-27T22:40:29Z",
+      "side": 1,
+      "message": "I\u0027m using the official one if you mean the app for updating the system. I haven\u0027t modified the source other than this change.",
+      "parentUuid": "6025ca80_fd13d735",
+      "revId": "d000f01ddc486a7fbeb5755f4ab92e79ff1af958",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad"
     }
   ]
 }
