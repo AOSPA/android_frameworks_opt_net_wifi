@@ -69,6 +69,23 @@
       "message": "Follow\nhttps://github.com/AOSPA/android_device_xiaomi_lisa/commit/a0660bfc6243d7c158b0b99b5efa0e021e4abe4d#diff-e408485c3c85f307211397310fd200945a7036f60b095f06d956c8cf5c8b9568",
       "revId": "d000f01ddc486a7fbeb5755f4ab92e79ff1af958",
       "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "85e2348b_45fc2a2e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000911
+      },
+      "writtenOn": "2023-07-01T07:10:14Z",
+      "side": 1,
+      "message": "You are correct. I think this patch shouldn\u0027t be merged. I\u0027ll abandon this.",
+      "revId": "d000f01ddc486a7fbeb5755f4ab92e79ff1af958",
+      "serverId": "3162e3d8-d894-470e-abd9-724f7b0effad"
     }
   ]
 }
